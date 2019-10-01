@@ -29,7 +29,7 @@ My source: [Github](https://github.com/hyperterminal-byte/ParallaxBot/)
 You can find the list of available commands with /help.
 
 HELP_STRINGS = """
-Hey there! My name is {}.
+Hey there! My name is Parallaxed Reflector Reborn.
 I'm a modular group management bot with a few fun extras! Have a look at the following for an idea of some of \
 the things I can help you with.
 

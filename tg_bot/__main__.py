@@ -19,17 +19,20 @@ from tg_bot.modules.helper_funcs.chat_status import is_user_admin
 from tg_bot.modules.helper_funcs.misc import paginate_modules
 
 PM_START_TEXT = """
-Hi {}, my name is {}! If you have any questions on how to use me, read /help - and then head to [HyperOT](https://t.me/rovaofftopic)
+Hi {}, my name is {}. If you have any questions on how to use me, read /help \
+and then head to [HyperOT](https://t.me/rovaofftopic)
 
-I'm a group manager bot completely based on Paul's popular Marie bot built in python3, using the python-telegram-bot library with not many changes.
+I'm a group manager bot completely based on Paul's popular Marie bot built in python3, \
+using the python-telegram-bot library with not many changes.
 
 My master: @hyperterminal
 My source: [Github](https://github.com/hyperterminal-byte/ParallaxBot/)
 
 You can find the list of available commands with /help.
+"""
 
 HELP_STRINGS = """
-Hey there! My name is Parallaxed Reflector Reborn.
+Hey there! My name is *{}*.
 I'm a modular group management bot with a few fun extras! Have a look at the following for an idea of some of \
 the things I can help you with.
 

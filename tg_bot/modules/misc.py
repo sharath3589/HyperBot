@@ -3,7 +3,7 @@ import json
 import random
 from datetime import datetime
 from typing import Optional, List
-
+import time
 import requests
 from telegram import Message, Chat, Update, Bot, MessageEntity
 from telegram import ParseMode
@@ -339,6 +339,13 @@ def gdpr(bot: Bot, update: Update):
                                         parse_mode=ParseMode.MARKDOWN)
 
 
+def ping(bot: Bot, update: Update):
+    start_time = time.time()
+    bot.send_message(update.effective_chat.id, "Pinging...")
+    end_time = time.time()
+    ping_time = float(end_time - start_time)*1000
+    update.effective_message.reply_text(" Ping response was : {}ms".format(ping_time))
+
 MARKDOWN_HELP = """
 Markdown is a very powerful formatting tool supported by telegram. {} has some enhancements, to make sure that \
 saved messages are correctly parsed, and to allow you to create buttons.
@@ -400,6 +407,8 @@ RUNS_HANDLER = DisableAbleCommandHandler("runs", runs)
 SLAP_HANDLER = DisableAbleCommandHandler("slap", slap, pass_args=True)
 INFO_HANDLER = DisableAbleCommandHandler("info", info, pass_args=True)
 
+PING_HANDLER = DisableAbleCommandHandler("ping", ping, filters=CustomFilters.sudo_filter)
+
 ECHO_HANDLER = CommandHandler("echo", echo, filters=Filters.user(OWNER_ID))
 MD_HELP_HANDLER = CommandHandler("markdownhelp", markdown_help, filters=Filters.private)
 
@@ -416,3 +425,4 @@ dispatcher.add_handler(ECHO_HANDLER)
 dispatcher.add_handler(MD_HELP_HANDLER)
 dispatcher.add_handler(STATS_HANDLER)
 dispatcher.add_handler(GDPR_HANDLER)
+dispatcher.add_handler(PING_HANDLER)

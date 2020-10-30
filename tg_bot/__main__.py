@@ -20,13 +20,13 @@ from tg_bot.modules.helper_funcs.misc import paginate_modules
 
 PM_START_TEXT = """
 Hi {}, my name is {}. If you have any questions on how to use me, read /help \
-and then head to [HyperOT](https://t.me/rovaofftopic)
+and then head to [HyperOT](https://t.me/hyperofftopic)
 
 I'm a group manager bot completely based on Paul's popular Marie bot built in python3, \
 using the python-telegram-bot library with not many changes.
 
 My master: @hyperterminal
-My source: [Github](https://github.com/hyperterminal-byte/ParallaxBot/)
+My source: [Github](https://github.com/hyperterminal-byte/HyperBot/)
 
 You can find the list of available commands with /help.
 """

@@ -25,13 +25,12 @@ def send_rules(update, chat_id, from_pm=False):
     try:
         chat = bot.get_chat(chat_id)
     except BadRequest as excp:
-        if excp.message == "Chat not found" and from_pm:
-            bot.send_message(user.id, "The rules shortcut for this chat hasn't been set properly! Ask admins to "
-                                      "fix this.")
-            return
-        else:
+        if excp.message != "Chat not found" or not from_pm:
             raise
 
+        bot.send_message(user.id, "The rules shortcut for this chat hasn't been set properly! Ask admins to "
+                                  "fix this.")
+        return
     rules = sql.get_rules(chat_id)
     text = "The rules for *{}* are:\n\n{}".format(escape_markdown(chat.title), rules)
 
@@ -54,7 +53,6 @@ def send_rules(update, chat_id, from_pm=False):
 @run_async
 @user_admin
 def set_rules(bot: Bot, update: Update):
-    chat_id = update.effective_chat.id
     msg = update.effective_message  # type: Optional[Message]
     raw_text = msg.text
     args = raw_text.split(None, 1)  # use python's maxsplit to separate cmd and args
@@ -63,6 +61,7 @@ def set_rules(bot: Bot, update: Update):
         offset = len(txt) - len(raw_text)  # set correct offset relative to command
         markdown_rules = markdown_parser(txt, entities=msg.parse_entities(), offset=offset)
 
+        chat_id = update.effective_chat.id
         sql.set_rules(chat_id, markdown_rules)
         update.effective_message.reply_text("Successfully set rules for this group.")
 

@@ -69,11 +69,11 @@ def purge(bot: Bot, update: Update, args: List[str]) -> str:
 @loggable
 def del_message(bot: Bot, update: Update) -> str:
     if update.effective_message.reply_to_message:
-        user = update.effective_user  # type: Optional[User]
         chat = update.effective_chat  # type: Optional[Chat]
         if can_delete(chat, bot.id):
             update.effective_message.reply_to_message.delete()
             update.effective_message.delete()
+            user = update.effective_user  # type: Optional[User]
             return "<b>{}:</b>" \
                    "\n#DEL" \
                    "\n<b>Admin:</b> {}" \

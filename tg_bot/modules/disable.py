@@ -67,13 +67,13 @@ if is_module_loaded(FILENAME):
     @run_async
     @user_admin
     def disable(bot: Bot, update: Update, args: List[str]):
-        chat = update.effective_chat  # type: Optional[Chat]
         if len(args) >= 1:
             disable_cmd = args[0]
             if disable_cmd.startswith(CMD_STARTERS):
                 disable_cmd = disable_cmd[1:]
 
             if disable_cmd in set(DISABLE_CMDS + DISABLE_OTHER):
+                chat = update.effective_chat  # type: Optional[Chat]
                 sql.disable_command(chat.id, disable_cmd)
                 update.effective_message.reply_text("Disabled the use of `{}`".format(disable_cmd),
                                                     parse_mode=ParseMode.MARKDOWN)
@@ -87,12 +87,12 @@ if is_module_loaded(FILENAME):
     @run_async
     @user_admin
     def enable(bot: Bot, update: Update, args: List[str]):
-        chat = update.effective_chat  # type: Optional[Chat]
         if len(args) >= 1:
             enable_cmd = args[0]
             if enable_cmd.startswith(CMD_STARTERS):
                 enable_cmd = enable_cmd[1:]
 
+            chat = update.effective_chat  # type: Optional[Chat]
             if sql.enable_command(chat.id, enable_cmd):
                 update.effective_message.reply_text("Enabled the use of `{}`".format(enable_cmd),
                                                     parse_mode=ParseMode.MARKDOWN)

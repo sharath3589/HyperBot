@@ -54,8 +54,6 @@ def report(bot: Bot, update: Update) -> str:
     message = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
-    ping_list = "";
-    
     if chat and message.reply_to_message and sql.chat_should_report(chat.id):
         reported_user = message.reply_to_message.from_user  # type: Optional[User]
         if reported_user.id == bot.id:
@@ -64,12 +62,14 @@ def report(bot: Bot, update: Update) -> str:
         chat_name = chat.title or chat.first or chat.username
         admin_list = chat.get_administrators()
 
+        ping_list = "";
+
         for admin in admin_list:
             if admin.user.is_bot:  # can't message bots
                 continue
 
             ping_list += f"​[​](tg://user?id={admin.user.id})"
-                
+
         message.reply_text(f"Successfully reported [{reported_user.first_name}](tg://user?id={reported_user.id}) to admins! " + ping_list, parse_mode = ParseMode.MARKDOWN )
 
     return ""

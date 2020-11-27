@@ -11,8 +11,6 @@ from tg_bot.modules.sql import rss_sql as sql
 
 
 def show_url(bot, update, args):
-    tg_chat_id = str(update.effective_chat.id)
-
     if len(args) >= 1:
         tg_feed_link = args[0]
         link_processed = parse(tg_feed_link)
@@ -20,31 +18,53 @@ def show_url(bot, update, args):
         if link_processed.bozo == 0:
             feed_title = link_processed.feed.get("title", default="Unknown")
             feed_description = "<i>{}</i>".format(
-                re.sub('<[^<]+?>', '', link_processed.feed.get("description", default="Unknown")))
+                re.sub(
+                    "<[^<]+?>",
+                    "",
+                    link_processed.feed.get("description", default="Unknown"),
+                )
+            )
             feed_link = link_processed.feed.get("link", default="Unknown")
 
-            feed_message = "<b>Feed Title:</b> \n{}" \
-                           "\n\n<b>Feed Description:</b> \n{}" \
-                           "\n\n<b>Feed Link:</b> \n{}".format(html.escape(feed_title),
-                                                               feed_description,
-                                                               html.escape(feed_link))
+            feed_message = (
+                "<b>Feed Title:</b> \n{}"
+                "\n\n<b>Feed Description:</b> \n{}"
+                "\n\n<b>Feed Link:</b> \n{}".format(
+                    html.escape(feed_title), feed_description, html.escape(feed_link)
+                )
+            )
+
+            tg_chat_id = str(update.effective_chat.id)
 
             if len(link_processed.entries) >= 1:
                 entry_title = link_processed.entries[0].get("title", default="Unknown")
                 entry_description = "<i>{}</i>".format(
-                    re.sub('<[^<]+?>', '', link_processed.entries[0].get("description", default="Unknown")))
+                    re.sub(
+                        "<[^<]+?>",
+                        "",
+                        link_processed.entries[0].get("description", default="Unknown"),
+                    )
+                )
                 entry_link = link_processed.entries[0].get("link", default="Unknown")
 
-                entry_message = "\n\n<b>Entry Title:</b> \n{}" \
-                                "\n\n<b>Entry Description:</b> \n{}" \
-                                "\n\n<b>Entry Link:</b> \n{}".format(html.escape(entry_title),
-                                                                     entry_description,
-                                                                     html.escape(entry_link))
+                entry_message = (
+                    "\n\n<b>Entry Title:</b> \n{}"
+                    "\n\n<b>Entry Description:</b> \n{}"
+                    "\n\n<b>Entry Link:</b> \n{}".format(
+                        html.escape(entry_title),
+                        entry_description,
+                        html.escape(entry_link),
+                    )
+                )
                 final_message = feed_message + entry_message
 
-                bot.send_message(chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML)
+                bot.send_message(
+                    chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML
+                )
             else:
-                bot.send_message(chat_id=tg_chat_id, text=feed_message, parse_mode=ParseMode.HTML)
+                bot.send_message(
+                    chat_id=tg_chat_id, text=feed_message, parse_mode=ParseMode.HTML
+                )
         else:
             update.effective_message.reply_text("This link is not an RSS Feed link")
     else:
@@ -63,20 +83,25 @@ def list_urls(bot, update):
 
     # check if the length of the message is too long to be posted in 1 chat bubble
     if len(final_content) == 0:
-        bot.send_message(chat_id=tg_chat_id, text="This chat is not subscribed to any links")
+        bot.send_message(
+            chat_id=tg_chat_id, text="This chat is not subscribed to any links"
+        )
     elif len(final_content) <= constants.MAX_MESSAGE_LENGTH:
-        bot.send_message(chat_id=tg_chat_id, text="This chat is subscribed to the following links:\n" + final_content)
+        bot.send_message(
+            chat_id=tg_chat_id,
+            text="This chat is subscribed to the following links:\n" + final_content,
+        )
     else:
-        bot.send_message(chat_id=tg_chat_id, parse_mode=ParseMode.HTML,
-                         text="<b>Warning:</b> The message is too long to be sent")
+        bot.send_message(
+            chat_id=tg_chat_id,
+            parse_mode=ParseMode.HTML,
+            text="<b>Warning:</b> The message is too long to be sent",
+        )
 
 
 @user_admin
 def add_url(bot, update, args):
     if len(args) >= 1:
-        chat = update.effective_chat
-
-        tg_chat_id = str(update.effective_chat.id)
 
         tg_feed_link = args[0]
 
@@ -88,6 +113,8 @@ def add_url(bot, update, args):
                 tg_old_entry_link = link_processed.entries[0].link
             else:
                 tg_old_entry_link = ""
+
+            tg_chat_id = str(update.effective_chat.id)
 
             # gather the row which contains exactly that telegram group ID and link for later comparison
             row = sql.check_url_availability(tg_chat_id, tg_feed_link)
@@ -108,13 +135,13 @@ def add_url(bot, update, args):
 @user_admin
 def remove_url(bot, update, args):
     if len(args) >= 1:
-        tg_chat_id = str(update.effective_chat.id)
-
         tg_feed_link = args[0]
 
         link_processed = parse(tg_feed_link)
 
         if link_processed.bozo == 0:
+            tg_chat_id = str(update.effective_chat.id)
+
             user_data = sql.check_url_availability(tg_chat_id, tg_feed_link)
 
             if user_data:
@@ -122,7 +149,9 @@ def remove_url(bot, update, args):
 
                 update.effective_message.reply_text("Removed URL from subscription")
             else:
-                update.effective_message.reply_text("You haven't subscribed to this URL yet")
+                update.effective_message.reply_text(
+                    "You haven't subscribed to this URL yet"
+                )
         else:
             update.effective_message.reply_text("This link is not an RSS Feed link")
     else:
@@ -148,41 +177,63 @@ def rss_update(bot, job):
         # this loop checks for every entry from the RSS Feed link from the DB row
         for entry in feed_processed.entries:
             # check if there are any new updates to the RSS Feed from the old entry
-            if entry.link != tg_old_entry_link:
-                new_entry_links.append(entry.link)
-                new_entry_titles.append(entry.title)
-            else:
+            if entry.link == tg_old_entry_link:
                 break
 
+            new_entry_links.append(entry.link)
+            new_entry_titles.append(entry.title)
         # check if there's any new entries queued from the last check
         if new_entry_links:
             sql.update_url(row_id, new_entry_links)
-        else:
-            pass
-
         if len(new_entry_links) < 5:
             # this loop sends every new update to each user from each group based on the DB entries
-            for link, title in zip(reversed(new_entry_links), reversed(new_entry_titles)):
-                final_message = "<b>{}</b>\n\n{}".format(html.escape(title), html.escape(link))
+            for link, title in zip(
+                reversed(new_entry_links), reversed(new_entry_titles)
+            ):
+                final_message = "<b>{}</b>\n\n{}".format(
+                    html.escape(title), html.escape(link)
+                )
 
                 if len(final_message) <= constants.MAX_MESSAGE_LENGTH:
-                    bot.send_message(chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML)
+                    bot.send_message(
+                        chat_id=tg_chat_id,
+                        text=final_message,
+                        parse_mode=ParseMode.HTML,
+                    )
                 else:
-                    bot.send_message(chat_id=tg_chat_id, text="<b>Warning:</b> The message is too long to be sent",
-                                     parse_mode=ParseMode.HTML)
+                    bot.send_message(
+                        chat_id=tg_chat_id,
+                        text="<b>Warning:</b> The message is too long to be sent",
+                        parse_mode=ParseMode.HTML,
+                    )
         else:
-            for link, title in zip(reversed(new_entry_links[-5:]), reversed(new_entry_titles[-5:])):
-                final_message = "<b>{}</b>\n\n{}".format(html.escape(title), html.escape(link))
+            for link, title in zip(
+                reversed(new_entry_links[-5:]), reversed(new_entry_titles[-5:])
+            ):
+                final_message = "<b>{}</b>\n\n{}".format(
+                    html.escape(title), html.escape(link)
+                )
 
                 if len(final_message) <= constants.MAX_MESSAGE_LENGTH:
-                    bot.send_message(chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML)
+                    bot.send_message(
+                        chat_id=tg_chat_id,
+                        text=final_message,
+                        parse_mode=ParseMode.HTML,
+                    )
                 else:
-                    bot.send_message(chat_id=tg_chat_id, text="<b>Warning:</b> The message is too long to be sent",
-                                     parse_mode=ParseMode.HTML)
+                    bot.send_message(
+                        chat_id=tg_chat_id,
+                        text="<b>Warning:</b> The message is too long to be sent",
+                        parse_mode=ParseMode.HTML,
+                    )
 
-            bot.send_message(chat_id=tg_chat_id, parse_mode=ParseMode.HTML,
-                             text="<b>Warning: </b>{} occurrences have been left out to prevent spam"
-                             .format(len(new_entry_links) - 5))
+            bot.send_message(
+                chat_id=tg_chat_id,
+                parse_mode=ParseMode.HTML,
+                text="<b>Warning: </b>{} occurrences have been left out to prevent spam".format(
+                    len(new_entry_links) - 5
+                ),
+            )
 
 
 def rss_set(bot, job):
@@ -211,8 +262,6 @@ def rss_set(bot, job):
         # check if there's any new entries queued from the last check
         if new_entry_links:
             sql.update_url(row_id, new_entry_links)
-        else:
-            pass
 
 
 __help__ = """

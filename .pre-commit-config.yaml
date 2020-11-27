@@ -1,0 +1,25 @@
+repos:
+  - repo: 'https://github.com/pre-commit/pre-commit-hooks'
+    rev: 'v3.3.0'
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: requirements-txt-fixer
+      - id: check-ast
+  - repo: 'https://github.com/psf/black'
+    rev: 20.8b1
+    hooks:
+      - id: black
+  - repo: 'https://gitlab.com/pycqa/flake8'
+    rev: 3.8.4
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - flake8-print
+          - flake8-quotes
+        args:
+          - '--ignore=W503,Q003,E203,T001,T003'
+          - '--max-line-length=120'
+          - '--inline-quotes=double'
+          - '--per-file-ignores=
+              tg_bot/__init__.py:E402'

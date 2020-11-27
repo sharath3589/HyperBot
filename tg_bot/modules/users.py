@@ -20,7 +20,7 @@ def get_user_id(username):
     if len(username) <= 5:
         return None
 
-    if username.startswith('@'):
+    if username.startswith("@"):
         username = username[1:]
 
     users = sql.get_userid_by_name(username)
@@ -39,9 +39,7 @@ def get_user_id(username):
                     return userdat.id
 
             except BadRequest as excp:
-                if excp.message == 'Chat not found':
-                    pass
-                else:
+                if excp.message != "Chat not found":
                     LOGGER.exception("Error extracting user ID")
 
     return None
@@ -59,10 +57,16 @@ def broadcast(bot: Bot, update: Update):
                 sleep(0.1)
             except TelegramError:
                 failed += 1
-                LOGGER.warning("Couldn't send broadcast to %s, group name %s", str(chat.chat_id), str(chat.chat_name))
+                LOGGER.warning(
+                    "Couldn't send broadcast to %s, group name %s",
+                    str(chat.chat_id),
+                    str(chat.chat_name),
+                )
 
-        update.effective_message.reply_text("Broadcast complete. {} groups failed to receive the message, probably "
-                                            "due to being kicked.".format(failed))
+        update.effective_message.reply_text(
+            "Broadcast complete. {} groups failed to receive the message, probably "
+            "due to being kicked.".format(failed)
+        )
 
 
 @run_async
@@ -70,33 +74,34 @@ def log_user(bot: Bot, update: Update):
     chat = update.effective_chat  # type: Optional[Chat]
     msg = update.effective_message  # type: Optional[Message]
 
-    sql.update_user(msg.from_user.id,
-                    msg.from_user.username,
-                    chat.id,
-                    chat.title)
+    sql.update_user(msg.from_user.id, msg.from_user.username, chat.id, chat.title)
 
     if msg.reply_to_message:
-        sql.update_user(msg.reply_to_message.from_user.id,
-                        msg.reply_to_message.from_user.username,
-                        chat.id,
-                        chat.title)
+        sql.update_user(
+            msg.reply_to_message.from_user.id,
+            msg.reply_to_message.from_user.username,
+            chat.id,
+            chat.title,
+        )
 
     if msg.forward_from:
-        sql.update_user(msg.forward_from.id,
-                        msg.forward_from.username)
+        sql.update_user(msg.forward_from.id, msg.forward_from.username)
 
 
 @run_async
 def chats(bot: Bot, update: Update):
     all_chats = sql.get_all_chats() or []
-    chatfile = 'List of chats.\n'
+    chatfile = "List of chats.\n"
     for chat in all_chats:
         chatfile += "{} - ({})\n".format(chat.chat_name, chat.chat_id)
 
     with BytesIO(str.encode(chatfile)) as output:
         output.name = "chatlist.txt"
-        update.effective_message.reply_document(document=output, filename="chatlist.txt",
-                                                caption="Here is the list of chats in my database.")
+        update.effective_message.reply_document(
+            document=output,
+            filename="chatlist.txt",
+            caption="Here is the list of chats in my database.",
+        )
 
 
 def __user_info__(user_id):
@@ -122,7 +127,9 @@ __help__ = ""  # no help string
 
 __mod_name__ = "Users"
 
-BROADCAST_HANDLER = CommandHandler("broadcast", broadcast, filters=Filters.user(OWNER_ID))
+BROADCAST_HANDLER = CommandHandler(
+    "broadcast", broadcast, filters=Filters.user(OWNER_ID)
+)
 USER_HANDLER = MessageHandler(Filters.all & Filters.group, log_user)
 CHATLIST_HANDLER = CommandHandler("chatlist", chats, filters=CustomFilters.sudo_filter)
 

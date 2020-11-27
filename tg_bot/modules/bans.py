@@ -8,8 +8,14 @@ from telegram.utils.helpers import mention_html
 
 from tg_bot import dispatcher, BAN_STICKER, LOGGER
 from tg_bot.modules.disable import DisableAbleCommandHandler
-from tg_bot.modules.helper_funcs.chat_status import bot_admin, user_admin, is_user_ban_protected, can_restrict, \
-    is_user_admin, is_user_in_chat
+from tg_bot.modules.helper_funcs.chat_status import (
+    bot_admin,
+    user_admin,
+    is_user_ban_protected,
+    can_restrict,
+    is_user_admin,
+    is_user_in_chat,
+)
 from tg_bot.modules.helper_funcs.extraction import extract_user_and_text
 from tg_bot.modules.helper_funcs.string_handling import extract_time
 from tg_bot.modules.log_channel import loggable
@@ -47,13 +53,17 @@ def ban(bot: Bot, update: Update, args: List[str]) -> str:
         message.reply_text("I'm not gonna BAN myself, are you crazy?")
         return ""
 
-    log = "<b>{}:</b>" \
-          "\n#BANNED" \
-          "\n<b>Admin:</b> {}" \
-          "\n<b>User:</b> {} (<code>{}</code>)".format(html.escape(chat.title),
-                                                       mention_html(user.id, user.first_name),
-                                                       mention_html(member.user.id, member.user.first_name),
-                                                       member.user.id)
+    log = (
+        "<b>{}:</b>"
+        "\n#BANNED"
+        "\n<b>Admin:</b> {}"
+        "\n<b>User:</b> {} (<code>{}</code>)".format(
+            html.escape(chat.title),
+            mention_html(user.id, user.first_name),
+            mention_html(member.user.id, member.user.first_name),
+            member.user.id,
+        )
+    )
     if reason:
         log += "\n<b>Reason:</b> {}".format(reason)
 
@@ -66,12 +76,17 @@ def ban(bot: Bot, update: Update, args: List[str]) -> str:
     except BadRequest as excp:
         if excp.message == "Reply message not found":
             # Do not reply
-            message.reply_text('Banned!', quote=False)
+            message.reply_text("Banned!", quote=False)
             return log
         else:
             LOGGER.warning(update)
-            LOGGER.exception("ERROR banning user %s in chat %s (%s) due to %s", user_id, chat.title, chat.id,
-                             excp.message)
+            LOGGER.exception(
+                "ERROR banning user %s in chat %s (%s) due to %s",
+                user_id,
+                chat.title,
+                chat.id,
+                excp.message,
+            )
             message.reply_text("Banned! *Grabs popcorn*")
 
     return ""
@@ -122,15 +137,19 @@ def temp_ban(bot: Bot, update: Update, args: List[str]) -> str:
     if not bantime:
         return ""
 
-    log = "<b>{}:</b>" \
-          "\n#TEMP BANNED" \
-          "\n<b>Admin:</b> {}" \
-          "\n<b>User:</b> {} (<code>{}</code>)" \
-          "\n<b>Time:</b> {}".format(html.escape(chat.title),
-                                     mention_html(user.id, user.first_name),
-                                     mention_html(member.user.id, member.user.first_name),
-                                     member.user.id,
-                                     time_val)
+    log = (
+        "<b>{}:</b>"
+        "\n#TEMP BANNED"
+        "\n<b>Admin:</b> {}"
+        "\n<b>User:</b> {} (<code>{}</code>)"
+        "\n<b>Time:</b> {}".format(
+            html.escape(chat.title),
+            mention_html(user.id, user.first_name),
+            mention_html(member.user.id, member.user.first_name),
+            member.user.id,
+            time_val,
+        )
+    )
     if reason:
         log += "\n<b>Reason:</b> {}".format(reason)
 
@@ -143,12 +162,19 @@ def temp_ban(bot: Bot, update: Update, args: List[str]) -> str:
     except BadRequest as excp:
         if excp.message == "Reply message not found":
             # Do not reply
-            message.reply_text("Banned! User will be banned for {}.".format(time_val), quote=False)
+            message.reply_text(
+                "Banned! User will be banned for {}.".format(time_val), quote=False
+            )
             return log
         else:
             LOGGER.warning(update)
-            LOGGER.exception("ERROR banning user %s in chat %s (%s) due to %s", user_id, chat.title, chat.id,
-                             excp.message)
+            LOGGER.exception(
+                "ERROR banning user %s in chat %s (%s) due to %s",
+                user_id,
+                chat.title,
+                chat.id,
+                excp.message,
+            )
             message.reply_text("Banned! *Grabs popcorn*")
 
     return ""
@@ -189,13 +215,17 @@ def kick(bot: Bot, update: Update, args: List[str]) -> str:
     if res:
         bot.send_sticker(chat.id, BAN_STICKER)  # banhammer marie sticker
         message.reply_text("Kicked!")
-        log = "<b>{}:</b>" \
-              "\n#KICKED" \
-              "\n<b>Admin:</b> {}" \
-              "\n<b>User:</b> {} (<code>{}</code>)".format(html.escape(chat.title),
-                                                           mention_html(user.id, user.first_name),
-                                                           mention_html(member.user.id, member.user.first_name),
-                                                           member.user.id)
+        log = (
+            "<b>{}:</b>"
+            "\n#KICKED"
+            "\n<b>Admin:</b> {}"
+            "\n<b>User:</b> {} (<code>{}</code>)".format(
+                html.escape(chat.title),
+                mention_html(user.id, user.first_name),
+                mention_html(member.user.id, member.user.first_name),
+                member.user.id,
+            )
+        )
         if reason:
             log += "\n<b>Reason:</b> {}".format(reason)
 
@@ -251,19 +281,25 @@ def unban(bot: Bot, update: Update, args: List[str]) -> str:
         return ""
 
     if is_user_in_chat(chat, user_id):
-        message.reply_text("Why are you trying to unban someone that's already in the chat?")
+        message.reply_text(
+            "Why are you trying to unban someone that's already in the chat?"
+        )
         return ""
 
     chat.unban_member(user_id)
     message.reply_text("Yep, this user can join!")
 
-    log = "<b>{}:</b>" \
-          "\n#UNBANNED" \
-          "\n<b>Admin:</b> {}" \
-          "\n<b>User:</b> {} (<code>{}</code>)".format(html.escape(chat.title),
-                                                       mention_html(user.id, user.first_name),
-                                                       mention_html(member.user.id, member.user.first_name),
-                                                       member.user.id)
+    log = (
+        "<b>{}:</b>"
+        "\n#UNBANNED"
+        "\n<b>Admin:</b> {}"
+        "\n<b>User:</b> {} (<code>{}</code>)".format(
+            html.escape(chat.title),
+            mention_html(user.id, user.first_name),
+            mention_html(member.user.id, member.user.first_name),
+            member.user.id,
+        )
+    )
     if reason:
         log += "\n<b>Reason:</b> {}".format(reason)
 
@@ -283,7 +319,9 @@ __help__ = """
 __mod_name__ = "Bans"
 
 BAN_HANDLER = CommandHandler("ban", ban, pass_args=True, filters=Filters.group)
-TEMPBAN_HANDLER = CommandHandler(["tban", "tempban"], temp_ban, pass_args=True, filters=Filters.group)
+TEMPBAN_HANDLER = CommandHandler(
+    ["tban", "tempban"], temp_ban, pass_args=True, filters=Filters.group
+)
 KICK_HANDLER = CommandHandler("kick", kick, pass_args=True, filters=Filters.group)
 UNBAN_HANDLER = CommandHandler("unban", unban, pass_args=True, filters=Filters.group)
 KICKME_HANDLER = DisableAbleCommandHandler("kickme", kickme, filters=Filters.group)

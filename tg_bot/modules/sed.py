@@ -37,8 +37,12 @@ def separate_sed(sed_string):
         return None
 
     while counter < len(sed_string):
-        if sed_string[counter] == "\\" and counter + 1 < len(sed_string) and sed_string[counter + 1] == delim:
-            sed_string = sed_string[:counter] + sed_string[counter + 1:]
+        if (
+            sed_string[counter] == "\\"
+            and counter + 1 < len(sed_string)
+            and sed_string[counter + 1] == delim
+        ):
+            sed_string = sed_string[:counter] + sed_string[counter + 1 :]
 
         elif sed_string[counter] == delim:
             replace_with = sed_string[start:counter]
@@ -69,24 +73,27 @@ def sed(bot: Bot, update: Update):
         repl, repl_with, flags = sed_result
 
         if not repl:
-            update.effective_message.reply_to_message.reply_text("You're trying to replace... "
-                                                                 "nothing with something?")
+            update.effective_message.reply_to_message.reply_text(
+                "You're trying to replace... " "nothing with something?"
+            )
             return
 
         try:
             check = re.match(repl, to_fix, flags=re.IGNORECASE)
 
             if check and check.group(0).lower() == to_fix.lower():
-                update.effective_message.reply_to_message.reply_text("Hey everyone, {} is trying to make "
-                                                                     "me say stuff I don't wanna "
-                                                                     "say!".format(update.effective_user.first_name))
+                update.effective_message.reply_to_message.reply_text(
+                    "Hey everyone, {} is trying to make "
+                    "me say stuff I don't wanna "
+                    "say!".format(update.effective_user.first_name)
+                )
                 return
 
-            if 'i' in flags and 'g' in flags:
+            if "i" in flags and "g" in flags:
                 text = re.sub(repl, repl_with, to_fix, flags=re.I).strip()
-            elif 'i' in flags:
+            elif "i" in flags:
                 text = re.sub(repl, repl_with, to_fix, count=1, flags=re.I).strip()
-            elif 'g' in flags:
+            elif "g" in flags:
                 text = re.sub(repl, repl_with, to_fix).strip()
             else:
                 text = re.sub(repl, repl_with, to_fix, count=1).strip()
@@ -98,8 +105,10 @@ def sed(bot: Bot, update: Update):
 
         # empty string errors -_-
         if len(text) >= telegram.MAX_MESSAGE_LENGTH:
-            update.effective_message.reply_text("The result of the sed command was too long for \
-                                                 telegram!")
+            update.effective_message.reply_text(
+                "The result of the sed command was too long for \
+                                                 telegram!"
+            )
         elif text:
             update.effective_message.reply_to_message.reply_text(text)
 
@@ -113,11 +122,15 @@ larger than {}.
 *Reminder:* Sed uses some special characters to make matching easier, such as these: `+*.?\\`
 If you want to use these characters, make sure you escape them!
 eg: \\?.
-""".format(telegram.MAX_MESSAGE_LENGTH)
+""".format(
+    telegram.MAX_MESSAGE_LENGTH
+)
 
 __mod_name__ = "Sed/Regex"
 
 
-SED_HANDLER = DisableAbleRegexHandler(r's([{}]).*?\1.*'.format("".join(DELIMITERS)), sed, friendly="sed")
+SED_HANDLER = DisableAbleRegexHandler(
+    r"s([{}]).*?\1.*".format("".join(DELIMITERS)), sed, friendly="sed"
+)
 
 dispatcher.add_handler(SED_HANDLER)

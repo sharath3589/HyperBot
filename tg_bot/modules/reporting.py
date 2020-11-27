@@ -1,17 +1,15 @@
-import html
 from typing import Optional, List
 
 from telegram import Message, Chat, Update, Bot, User, ParseMode
-from telegram.error import BadRequest, Unauthorized
 from telegram.ext import CommandHandler, RegexHandler, run_async, Filters
-from telegram.utils.helpers import mention_html
 
-from tg_bot import dispatcher, LOGGER
+from tg_bot import dispatcher
 from tg_bot.modules.helper_funcs.chat_status import user_not_admin, user_admin
 from tg_bot.modules.log_channel import loggable
 from tg_bot.modules.sql import reporting_sql as sql
 
 REPORT_GROUPS = 5
+
 
 @run_async
 @user_admin
@@ -23,28 +21,42 @@ def report_setting(bot: Bot, update: Update, args: List[str]):
         if len(args) >= 1:
             if args[0] in ("yes", "on"):
                 sql.set_user_setting(chat.id, True)
-                msg.reply_text("Turned on reporting! You'll be notified whenever anyone reports something.")
+                msg.reply_text(
+                    "Turned on reporting! You'll be notified whenever anyone reports something."
+                )
 
             elif args[0] in ("no", "off"):
                 sql.set_user_setting(chat.id, False)
                 msg.reply_text("Turned off reporting! You wont get any reports.")
         else:
-            msg.reply_text("Your current report preference is: `{}`".format(sql.user_should_report(chat.id)),
-                           parse_mode=ParseMode.MARKDOWN)
+            msg.reply_text(
+                "Your current report preference is: `{}`".format(
+                    sql.user_should_report(chat.id)
+                ),
+                parse_mode=ParseMode.MARKDOWN,
+            )
 
     else:
         if len(args) >= 1:
             if args[0] in ("yes", "on"):
                 sql.set_chat_setting(chat.id, True)
-                msg.reply_text("Turned on reporting! Admins who have turned on reports will be notified when /report "
-                               "or @admin are called.")
+                msg.reply_text(
+                    "Turned on reporting! Admins who have turned on reports will be notified when /report "
+                    "or @admin are called."
+                )
 
             elif args[0] in ("no", "off"):
                 sql.set_chat_setting(chat.id, False)
-                msg.reply_text("Turned off reporting! No admins will be notified on /report or @admin.")
+                msg.reply_text(
+                    "Turned off reporting! No admins will be notified on /report or @admin."
+                )
         else:
-            msg.reply_text("This chat's current setting is: `{}`".format(sql.chat_should_report(chat.id)),
-                           parse_mode=ParseMode.MARKDOWN)
+            msg.reply_text(
+                "This chat's current setting is: `{}`".format(
+                    sql.chat_should_report(chat.id)
+                ),
+                parse_mode=ParseMode.MARKDOWN,
+            )
 
 
 @run_async
@@ -53,16 +65,14 @@ def report_setting(bot: Bot, update: Update, args: List[str]):
 def report(bot: Bot, update: Update) -> str:
     message = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
-    user = update.effective_user  # type: Optional[User]
     if chat and message.reply_to_message and sql.chat_should_report(chat.id):
         reported_user = message.reply_to_message.from_user  # type: Optional[User]
         if reported_user.id == bot.id:
             message.reply_text("Haha nope, not gonna report myself.")
             return ""
-        chat_name = chat.title or chat.first or chat.username
         admin_list = chat.get_administrators()
 
-        ping_list = "";
+        ping_list = ""
 
         for admin in admin_list:
             if admin.user.is_bot:  # can't message bots
@@ -70,7 +80,11 @@ def report(bot: Bot, update: Update) -> str:
 
             ping_list += f"​[​](tg://user?id={admin.user.id})"
 
-        message.reply_text(f"Successfully reported [{reported_user.first_name}](tg://user?id={reported_user.id}) to admins! " + ping_list, parse_mode = ParseMode.MARKDOWN )
+        message.reply_text(
+            f"Successfully reported [{reported_user.first_name}](tg://user?id={reported_user.id}) to admins! "
+            + ping_list,
+            parse_mode=ParseMode.MARKDOWN,
+        )
 
     return ""
 
@@ -81,12 +95,14 @@ def __migrate__(old_chat_id, new_chat_id):
 
 def __chat_settings__(chat_id, user_id):
     return "This chat is setup to send user reports to admins, via /report and @admin: `{}`".format(
-        sql.chat_should_report(chat_id))
+        sql.chat_should_report(chat_id)
+    )
 
 
 def __user_settings__(user_id):
     return "You receive reports from chats you're admin in: `{}`.\nToggle this with /reports in PM.".format(
-        sql.user_should_report(user_id))
+        sql.user_should_report(user_id)
+    )
 
 
 __mod_name__ = "Reporting"
